@@ -1,0 +1,51 @@
+Build a React functional component using Tailwind CSS that replicates a minimal, Apple-inspired horizontal day selector UI.
+Layout
+Horizontal flex container, center aligned
+Each day is a vertical pill-shaped card
+Equal spacing between pills
+Overall background is very light gray (#F4F4F4)
+Pill Design
+Width ~64px, height ~96px
+Fully rounded corners (rounded-full)
+Background: white
+Subtle inner shadow for depth
+Soft drop shadow for elevation
+Content Inside Pill
+Top: weekday letter (T, W, T, F, S)
+Small uppercase text
+Light gray color
+Slight letter spacing
+Center: large date number
+Bold, rounded sans-serif font
+Active Day Styling
+Active pill contains:
+A perfect red circular badge behind the date number
+Circle uses a vertical gradient (from-red-600 to-red-400)
+Date text is white and bold
+Active pill shadow is stronger
+Slight vertical lift (-translate-y-1)
+Inactive Day Styling
+Date number in muted gray
+Slight opacity (80–90%)
+Lighter shadow than active
+Shadows
+Use soft shadows only:
+Inactive: shadow-sm
+Active: shadow-lg
+No harsh borders
+Interactions
+Hover:
+Slight lift (-translate-y-0.5)
+Shadow increases smoothly
+Click:
+Smooth scale down (scale-95)
+Spring back animation
+All transitions should use:
+transition-all
+duration-300
+ease-out
+Tailwind Rules
+No dark theme
+No outlines
+No gradients except for active red circle
+Focus on spacing, softness, and clarity
