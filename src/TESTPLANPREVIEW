@@ -1,0 +1,250 @@
+import React, { useState, useRef } from "react";
+
+/*
+  Test Plan Preview – React + Tailwind
+  -----------------------------------
+  FIX APPLIED:
+  - Fixed JSX syntax error caused by an unclosed Fragment in <Section />
+  - Kept browser-native print-to-PDF (window.print)
+  - PDF respects current theme
+  - Header hidden during print
+*/
+
+/* =========================
+   Reusable Components
+   ========================= */
+
+function Section({ title, children }) {
+  return (
+    <>
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 16mm; }
+          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+      `}</style>
+      <section className="max-w-7xl mx-auto px-16 mb-32 print:mb-20">
+        <h2 className="text-3xl font-medium mb-10 print:text-2xl">{title}</h2>
+        {children}
+      </section>
+    </>
+  );
+}
+
+function Metric({ value, label, sub }) {
+  return (
+    <div>
+      <div className="text-6xl font-semibold print:text-4xl">{value}</div>
+      <div className="mt-2 text-sm opacity-60">{label}</div>
+      {sub && <div className="text-xs opacity-40 mt-1">{sub}</div>}
+    </div>
+  );
+}
+
+function Detail({ label, value }) {
+  return (
+    <div className="flex justify-between border-b border-current/10 py-4">
+      <span className="opacity-60">{label}</span>
+      <span>{value}</span>
+    </div>
+  );
+}
+
+function CoverageBar({ manual, automation }) {
+  const total = manual + automation;
+  const manualPct = total ? (manual / total) * 100 : 0;
+  const autoPct = total ? (automation / total) * 100 : 0;
+
+  return (
+    <div className="w-full">
+      <div className="flex h-3 w-full overflow-hidden rounded-full bg-current/10">
+        <div className="h-full bg-amber-400" style={{ width: `${manualPct}%` }} />
+        <div className="h-full bg-emerald-500" style={{ width: `${autoPct}%` }} />
+      </div>
+      <div className="mt-2 flex justify-between text-xs opacity-60">
+        <span>Manual: {manual}</span>
+        <span>Automation: {automation}</span>
+      </div>
+    </div>
+  );
+}
+
+/* =========================
+   Main Screen
+   ========================= */
+
+export default function TestPlanPreview() {
+  const [theme, setTheme] = useState("dark");
+  const isDark = theme === "dark";
+  const printRef = useRef(null);
+
+  const downloadPDF = () => {
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        window.print();
+      }, 50);
+    });
+  };
+
+  return (
+    <div
+      ref={printRef}
+      className={`min-h-screen w-full overflow-y-auto transition-colors duration-300 ${
+        isDark ? "bg-[#0B0E12] text-white" : "bg-white text-[#0B0E12]"
+      }`}
+    >
+      {/* Fixed Header (hidden in PDF) */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-30 backdrop-blur border-b transition-colors duration-300 print:hidden ${
+          isDark ? "bg-[#0B0E12]/90 border-white/10" : "bg-white/90 border-black/10"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-16 py-6 flex items-center justify-between">
+          <span className="text-xs tracking-widest text-amber-400">1 / 3 · APPROVED</span>
+
+          <div className="flex items-center gap-6 text-sm opacity-70">
+            <button
+              onClick={downloadPDF}
+              className="px-3 py-1 rounded-full border text-xs hover:opacity-80"
+            >
+              Download PDF
+            </button>
+            <button
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              className="px-3 py-1 rounded-full border text-xs hover:opacity-80"
+            >
+              {isDark ? "Light Mode" : "Dark Mode"}
+            </button>
+            <span>Edit</span>
+            <span>Preview</span>
+            <span>Run</span>
+            <span>Delete</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="max-w-7xl mx-auto px-16 pt-40 pb-32 flex print:pt-12 print:pb-20">
+        <div className="w-1/2 pr-24">
+          <h1 className="text-6xl font-semibold leading-tight print:text-4xl">
+            Payments Test<br />Plan
+          </h1>
+          <p className="mt-6 opacity-60 max-w-md">
+            End-to-end quality strategy covering all critical business flows
+          </p>
+        </div>
+
+        <div className="w-px bg-current/10" />
+
+        <div className="w-1/2 pl-24 grid grid-cols-3 gap-16">
+          <Metric value="30" label="Manual Tests" />
+          <Metric value="70" label="Automation Tests" />
+          <Metric value="3" label="Test Suites" sub="Unit · Functional · Regression" />
+        </div>
+      </section>
+
+      <Section title="Project Details">
+        <Detail label="Plan Name" value="Payments Test Plan" />
+        <Detail label="Project Manager" value="Rajasekhar Reddy" />
+        <Detail label="Business Unit" value="Digital Payments" />
+        <Detail label="CSR Number" value="CSR-PAY-23941" />
+        <Detail label="Document ID" value="QA-PAY-TP-001" />
+        <Detail label="Version" value="v1.3" />
+        <Detail label="Status" value="Approved" />
+      </Section>
+
+      <Section title="Test Scope">
+        <p className="opacity-60 max-w-3xl">
+          Covers payment initiation, authorization, refunds, failures,
+          reconciliation, and audit flows.
+        </p>
+      </Section>
+
+      <Section title="Testing Objectives">
+        <ul className="list-disc pl-6 space-y-3 opacity-60 max-w-3xl">
+          <li>Validate all critical end-to-end payment workflows across supported channels.</li>
+          <li>Ensure data integrity and correctness during authorization, capture, and refund processes.</li>
+          <li>Verify system stability and backward compatibility through comprehensive regression testing.</li>
+          <li>Identify defects related to third-party integrations, APIs, and gateway interactions.</li>
+          <li>Confirm compliance with security, audit, and business requirements before release sign-off.</li>
+        </ul>
+      </Section>
+
+      <Section title="Test Types & Coverage">
+        <div className="space-y-12">
+          {[{
+            name: "Functional Suite",
+            manual: 10,
+            automation: 30,
+            start: "01 Jan 2026",
+            end: "10 Jan 2026",
+            desc: "Core payment flows",
+          },{
+            name: "Regression Suite",
+            manual: 5,
+            automation: 30,
+            start: "11 Jan 2026",
+            end: "18 Jan 2026",
+            desc: "Release stability",
+          },{
+            name: "Integration Suite",
+            manual: 8,
+            automation: 7,
+            start: "05 Jan 2026",
+            end: "15 Jan 2026",
+            desc: "Partner & gateway validation",
+          },{
+            name: "API Suite",
+            manual: 7,
+            automation: 3,
+            start: "08 Jan 2026",
+            end: "20 Jan 2026",
+            desc: "Contract & negative testing",
+          }].map((suite) => (
+            <div key={suite.name} className="grid grid-cols-2 gap-24">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span className="font-medium">{suite.name}</span>
+                  <span className="opacity-60">{suite.manual + suite.automation}</span>
+                </div>
+                <CoverageBar manual={suite.manual} automation={suite.automation} />
+                <div className="mt-3 text-xs opacity-60">📅 {suite.start} – {suite.end}</div>
+              </div>
+              <div className="opacity-60 leading-relaxed">{suite.desc}</div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Test Suites Summary">
+        <CoverageBar manual={30} automation={70} />
+      </Section>
+
+      <Section title="Schedule & Resources">
+        <div className="space-y-8 opacity-60">
+          <div className="grid grid-cols-[160px_1fr] gap-6">
+            <div className="font-medium">📅 Execution</div>
+            <div>01 Jan 2026 – 22 Jan 2026 · <strong>22 Days</strong></div>
+          </div>
+
+          <div className="grid grid-cols-[160px_1fr] gap-6">
+            <div className="font-medium">👤 QA Lead</div>
+            <div className="flex items-center gap-4">
+              <div className="w-9 h-9 rounded-full bg-current/10 flex items-center justify-center">RK</div>
+              <span>Rajasekhar</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-[160px_1fr] gap-6">
+            <div className="font-medium">👥 QA Engineers</div>
+            <div className="flex gap-6">
+              {["AK", "SP", "VK"].map((id) => (
+                <div key={id} className="w-9 h-9 rounded-full bg-current/10 flex items-center justify-center">{id}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Section>
+    </div>
+  );
+}
